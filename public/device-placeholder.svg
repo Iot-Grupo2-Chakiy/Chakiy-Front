@@ -1,0 +1,5 @@
+<!-- public/device-placeholder.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="#3b82f6" viewBox="0 0 24 24">
+  <path d="M12 2a10 10 0 1010 10A10.011 10.011 0 0012 2zm0 18.4A8.4 8.4 0 1120.4 12 8.41 8.41 0 0112 20.4z"></path>
+  <path d="M12 7.2a4.8 4.8 0 104.8 4.8A4.8 4.8 0 0012 7.2zm0 8A3.2 3.2 0 1115.2 12 3.2 3.2 0 0112 15.2z"></path>
+</svg>
