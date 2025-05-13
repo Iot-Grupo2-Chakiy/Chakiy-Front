@@ -13,29 +13,8 @@ const dispositivosMock = [
         umbrales: 'T 20–26°C | H 40–60% | ICA < 50',
         ultimaAccion: 'Purificador activado 18:32',
         imagen: 'device-placeholder.svg',
+        activo: false,
     },
-    {
-        id: 2,
-        nombre: 'Dispositivo 2',
-        descripcion: 'Sensor Sala',
-        temperatura: '22°C',
-        humedad: '50%',
-        ica: '45',
-        umbrales: 'T 20–26°C | H 40–60% | ICA < 50',
-        ultimaAccion: 'Purificador activado 18:32',
-        imagen: 'device-placeholder.svg',
-    },
-    {
-        id: 3,
-        nombre: 'Dispositivo 3',
-        descripcion: 'Sensor Cocina',
-        temperatura: '25°C',
-        humedad: '60%',
-        ica: '40',
-        umbrales: 'T 20–26°C | H 40–60% | ICA < 50',
-        ultimaAccion: 'Purificador activado 18:32',
-        imagen: 'device-placeholder.svg',
-    }
 ];
 
 export default function Dispositivos() {
@@ -55,8 +34,19 @@ export default function Dispositivos() {
         setDispositivoSeleccionado(null);
     };
 
-    const activarDispositivo = (id: number) => {
-        alert(`Activando dispositivo con ID ${id}`);
+    const toggleActivacion = (id: number) => {
+        setDispositivos(prev =>
+            prev.map(d => {
+                if (d.id === id) {
+                    const nuevoEstado = !d.activo;
+                    if (nuevoEstado) {
+                        alert(`${d.nombre} está activado`);
+                    }
+                    return { ...d, activo: nuevoEstado };
+                }
+                return d;
+            })
+        );
     };
 
     const eliminarDispositivo = (id: number) => {
@@ -80,7 +70,12 @@ export default function Dispositivos() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {dispositivos.map((disp) => (
-                    <div key={disp.id} className="bg-white shadow-md rounded-lg p-4">
+                    <div
+                        key={disp.id}
+                        className={`shadow-md rounded-lg p-4 transition-colors ${
+                            disp.activo ? 'bg-green-100' : 'bg-white'
+                        }`}
+                    >
                         <img
                             className="w-full h-32 object-contain mb-3"
                             src={disp.imagen}
@@ -95,10 +90,12 @@ export default function Dispositivos() {
 
                         <div className="flex gap-2 mt-4">
                             <button
-                                onClick={() => activarDispositivo(disp.id)}
-                                className="bg-sky-500 text-white text-sm px-3 py-1 rounded hover:bg-sky-600"
+                                onClick={() => toggleActivacion(disp.id)}
+                                className={`text-white text-sm px-3 py-1 rounded transition-colors ${
+                                    disp.activo ? 'bg-red-500 hover:bg-red-600' : 'bg-sky-500 hover:bg-sky-600'
+                                }`}
                             >
-                                Activar
+                                {disp.activo ? 'Desactivar' : 'Activar'}
                             </button>
                             <button
                                 onClick={() => abrirModal('editar', disp)}
