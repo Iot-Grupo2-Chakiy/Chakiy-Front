@@ -1,18 +1,10 @@
-type Rutina = {
-    nombre: string;
-    dispositivo: string;
-    condicion: string;
-    dias: string[];
-    horaInicio: string;
-    horaFin: string;
-    estado: string;
-    ultimaEjecucion: string;
-};
+import type { RoutineResponse } from "@/utils/responseInterfaces";
+
 
 type Props = {
     isOpen: boolean;
     onClose: () => void;
-    rutina: Rutina | null;
+    rutina: RoutineResponse | null;
 };
 
 export default function RutinaDetalleModal({ isOpen, onClose, rutina }: Props) {
@@ -24,13 +16,12 @@ export default function RutinaDetalleModal({ isOpen, onClose, rutina }: Props) {
                 <h2 className="text-lg font-bold mb-4">Detalles Rutina</h2>
 
                 <div className="space-y-2 text-sm text-gray-800">
-                    <p><strong>Nombre:</strong> {rutina.nombre}</p>
-                    <p><strong>Dispositivo asociado:</strong> {rutina.dispositivo}</p>
-                    <p><strong>Condición:</strong> {rutina.condicion}</p>
-                    <p><strong>Días activos:</strong> {rutina.dias.join(', ')}</p>
-                    <p><strong>Rango horario:</strong> {rutina.horaInicio} a {rutina.horaFin}</p>
-                    <p><strong>Estado:</strong> {rutina.estado}</p>
-                    <p><strong>Última ejecución:</strong> {rutina.ultimaEjecucion}</p>
+                    <p><strong>Nombre:</strong> {rutina.name}</p>
+                    <p><strong>Dispositivo asociado:</strong> {rutina.device.name}</p>
+                    <p><strong>Condición:</strong> {rutina.condition}</p>
+                    <p><strong>Días activos:</strong> {rutina.days.join(', ')}</p>
+                    <p><strong>Rango horario:</strong> {rutina.startTime} a {rutina.endTime}</p>
+                    <p><strong>Ubicación:</strong> {rutina.ubication || 'N/A'}</p>
                 </div>
 
                 <div className="flex justify-end mt-6">

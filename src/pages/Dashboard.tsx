@@ -31,8 +31,6 @@ export default function Dashboard() {
                     relativeHumidity2m: current.variables(1)!.value(),
                 };
 
-                console.log("Current Weather Data:", currentWeather);
-
                 setWeatherData({
                     temperatura: `${currentWeather.temperature2m.toFixed(2)} °C`,
                     humedad: `${currentWeather.relativeHumidity2m} %`,
