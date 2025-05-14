@@ -3,6 +3,8 @@ import { useState } from 'react';
 type Props = {
     isOpen: boolean;
     onClose: () => void;
+    dispositivo: Dispositivo | null;
+    modoEdicion: boolean;
     onSave: (data: {
         name: string;
         temperaturaMin: number;

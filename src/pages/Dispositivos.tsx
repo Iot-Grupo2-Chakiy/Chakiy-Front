@@ -3,11 +3,14 @@ import { Plus } from 'lucide-react';
 import DispositivoModal from '../components/DispositivoModal';
 import { IoTDevicesService } from '../services/IoTDevicesService';
 
+
+
+
 export default function Dispositivos() {
     const [modalAbierto, setModalAbierto] = useState(false);
-    const [dispositivos, setDispositivos] = useState([]);
+    const [dispositivos, setDispositivos] = useState<Dispositivo[]>(dispositivosMock);
     const [modoEdicion, setModoEdicion] = useState(false);
-    const [dispositivoSeleccionado, setDispositivoSeleccionado] = useState(null);
+    const [dispositivoSeleccionado, setDispositivoSeleccionado] = useState<Dispositivo | null>(null);
 
     useEffect(() => {
         const fetchDispositivos = async () => {
@@ -37,6 +40,7 @@ export default function Dispositivos() {
     }, []);
 
     const abrirModal = (modo: 'nuevo' | 'editar', dispositivo = null) => {
+
         setModoEdicion(modo === 'editar');
         setDispositivoSeleccionado(dispositivo);
         setModalAbierto(true);
