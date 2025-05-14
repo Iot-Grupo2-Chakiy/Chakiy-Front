@@ -16,8 +16,10 @@ jobs:
         env:
           CI: false        
         run: npm run build
+      - name: Debug Build Directory
+        run: ls -la build
       - name: Archive Production Artifact
-        uses: actions/upload-artifact@v3  # Updated to use a stable version
+        uses: actions/upload-artifact@v3.1.0  # Pin to a specific version
         with:
           name: build
           path: build
