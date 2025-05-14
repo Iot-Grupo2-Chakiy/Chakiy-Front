@@ -2,7 +2,21 @@ import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import DispositivoModal from '../components/DispositivoModal';
 
-const dispositivosMock = [
+// Define interfaces
+export interface Dispositivo {
+    id: number;
+    nombre: string;
+    descripcion: string;
+    temperatura: string;
+    humedad: string;
+    ica: string;
+    umbrales: string;
+    ultimaAccion: string;
+    imagen: string;
+    activo: boolean;
+}
+
+const dispositivosMock: Dispositivo[] = [
     {
         id: 1,
         nombre: 'Dispositivo 1',
@@ -19,11 +33,11 @@ const dispositivosMock = [
 
 export default function Dispositivos() {
     const [modalAbierto, setModalAbierto] = useState(false);
-    const [dispositivos, setDispositivos] = useState(dispositivosMock);
+    const [dispositivos, setDispositivos] = useState<Dispositivo[]>(dispositivosMock);
     const [modoEdicion, setModoEdicion] = useState(false);
-    const [dispositivoSeleccionado, setDispositivoSeleccionado] = useState(null);
+    const [dispositivoSeleccionado, setDispositivoSeleccionado] = useState<Dispositivo | null>(null);
 
-    const abrirModal = (modo: 'nuevo' | 'editar', dispositivo = null) => {
+    const abrirModal = (modo: 'nuevo' | 'editar', dispositivo: Dispositivo | null = null) => {
         setModoEdicion(modo === 'editar');
         setDispositivoSeleccionado(dispositivo);
         setModalAbierto(true);

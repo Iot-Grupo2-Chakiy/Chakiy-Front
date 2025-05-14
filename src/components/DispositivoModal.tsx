@@ -1,7 +1,11 @@
-type Props = {
+import type { Dispositivo } from '../pages/Dispositivos';
+
+interface Props {
     isOpen: boolean;
     onClose: () => void;
-};
+    dispositivo: Dispositivo | null;
+    modoEdicion: boolean;
+}
 
 export default function DispositivoModal({ isOpen, onClose }: Props) {
     if (!isOpen) return null;
