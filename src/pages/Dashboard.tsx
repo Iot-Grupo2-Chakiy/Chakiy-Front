@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { fetchWeatherApi } from 'openmeteo';
+import { IoTDevicesService } from '../services/IoTDevicesService';
 
 export default function Dashboard() {
     const [weatherData, setWeatherData] = useState({
         temperatura: 'Cargando...',
         humedad: 'Cargando...',
     });
+    const [dispositivosEncendidos, setDispositivosEncendidos] = useState(0);
 
     useEffect(() => {
         const fetchAndLogWeatherData = async () => {
@@ -40,11 +42,25 @@ export default function Dashboard() {
             }
         };
 
+        const fetchDispositivosEncendidos = async () => {
+            try {
+                const dispositivos = await IoTDevicesService.getAllIoTDevices();
+                console.log('Datos obtenidos del backend:', dispositivos);
+
+                // Count devices with estado === true
+                const encendidos = dispositivos.filter((device) => device.estado === true).length;
+                setDispositivosEncendidos(encendidos);
+            } catch (error) {
+                console.error('Error fetching devices:', error);
+            }
+        };
+
         fetchAndLogWeatherData();
+        fetchDispositivosEncendidos();
     }, []);
 
     const data = {
-        dispositivosEncendidos: 5,
+        dispositivosEncendidos,
         climaLocal: weatherData.temperatura,
         humedadLocal: weatherData.humedad,
         sensores: [
