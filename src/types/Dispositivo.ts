@@ -1,12 +1,24 @@
 export interface Dispositivo {
-  id: number;
-  name: string;
-  descripcion?: string;
-  temperaturaMin?: number;
-  temperaturaMax?: number;
-  humedadMin?: number;
-  humedadMax?: number;
-  calidadDeAireMin?: number;
-  calidadDeAireMax?: number;
-  estado: boolean;
+    id: number;
+    name: string;
+    nombre?: string;
+    descripcion?: string;
+    temperaturaMin: number;
+    temperaturaMax: number;
+    humedadMin: number;
+    humedadMax: number;
+    calidadDeAireMin: number;
+    calidadDeAireMax: number;
+    estado: boolean;
+    // Propiedades de UI
+    temperatura?: string;
+    humedad?: string;
+    ica?: string;
+    umbrales?: string;
+    ultimaAccion?: string;
+    imagen?: string;
+    activo?: boolean;
 }
+
+// Tipo para crear nuevos dispositivos (sin id)
+export type DispositivoNuevo = Omit<Dispositivo, 'id' | 'temperatura' | 'humedad' | 'ica' | 'umbrales' | 'ultimaAccion' | 'imagen' | 'activo'>;

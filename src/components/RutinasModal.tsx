@@ -52,7 +52,7 @@ export default function RutinaModal({ isOpen, onClose, rutinaEditar }: Props) {
 
   const cargarDispositivos = async () => {
     try {
-      const data = await IoTDevicesService.getAllIoTDevices();
+      const data = await IoTDevicesService.getAllIoTDevices() as IoTDeviceResponse[];
       setIoTDevices(data);
     } catch {
       alert("Error al cargar los dispositivos. Por favor, inténtalo de nuevo.");
@@ -92,13 +92,11 @@ export default function RutinaModal({ isOpen, onClose, rutinaEditar }: Props) {
         ubication: formData.ubication
       };
       
-      let result;
-      
       if (rutinaEditar) {
-        result = await RoutineService.updateRoutine(rutinaEditar.id!, routineData);
+        await RoutineService.updateRoutine(rutinaEditar.id!, routineData);
         alert("Rutina actualizada exitosamente");
       } else {
-        result = await RoutineService.createRoutine(routineData);
+        await RoutineService.createRoutine(routineData);
         alert("Rutina creada exitosamente");
       }
       
@@ -106,7 +104,7 @@ export default function RutinaModal({ isOpen, onClose, rutinaEditar }: Props) {
     } catch {
       alert("Error al procesar la rutina. Por favor, inténtalo de nuevo.");
     }
-  };
+};
 
   const toggleDay = (dayValue: string) => {
     const isSelected = formData.days.includes(dayValue);

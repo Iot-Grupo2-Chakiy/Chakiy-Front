@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { fetchWeatherApi } from 'openmeteo';
 import IoTDevicesService from '../services/IoTDevicesService';
+import type { IoTDeviceResponse } from '@/utils/responseInterfaces';
 
 export default function Dashboard() {
     const [weatherData, setWeatherData] = useState({
@@ -44,10 +45,9 @@ export default function Dashboard() {
 
         const fetchDispositivosEncendidos = async () => {
             try {
-                const dispositivos = await IoTDevicesService.getAllIoTDevices();
+                const dispositivos = await IoTDevicesService.getAllIoTDevices() as IoTDeviceResponse[];
                 console.log('Datos obtenidos del backend:', dispositivos);
 
-                // Count devices with estado === true
                 const encendidos = dispositivos.filter((device) => device.estado === true).length;
                 setDispositivosEncendidos(encendidos);
             } catch (error) {

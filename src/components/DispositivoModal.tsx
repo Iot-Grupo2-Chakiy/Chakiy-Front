@@ -1,11 +1,12 @@
 import { useState } from 'react';
+import type { Dispositivo } from '../types/Dispositivo';
 
 type Props = {
     isOpen: boolean;
     onClose: () => void;
     dispositivo: Dispositivo | null;
     modoEdicion: boolean;
-    onSave: (data: {
+    onCrear: (data: {  // Changed from onSave to onCrear to match usage
         name: string;
         temperaturaMin: number;
         temperaturaMax: number;
@@ -17,7 +18,7 @@ type Props = {
     }) => Promise<void>;
 };
 
-export default function DispositivoModal({ isOpen, onClose, onSave }: Props) {
+export default function DispositivoModal({ isOpen, onClose, onCrear }: Props) {
     const [formData, setFormData] = useState({
         name: '',
         temperaturaMin: 0,
@@ -40,7 +41,7 @@ export default function DispositivoModal({ isOpen, onClose, onSave }: Props) {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await onSave(formData);
+            await onCrear(formData);
             console.log('Device created successfully:', formData);
             onClose();
         } catch (error) {

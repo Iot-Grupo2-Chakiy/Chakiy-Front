@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:8091/api/v1/iot-devices";
+const API_BASE_URL = "https://chakiyiotsupermain-aqd8ephjbra0e5bf.canadacentral-01.azurewebsites.net/api/v1/iot-devices";
 
 const IoTDevicesService = {
   /**
