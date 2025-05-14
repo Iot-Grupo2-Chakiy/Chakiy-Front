@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { fetchWeatherApi } from 'openmeteo';
-import { IoTDevicesService } from '../services/IoTDevicesService';
+import IoTDevicesService from '../services/IoTDevicesService';
 
 export default function Dashboard() {
     const [weatherData, setWeatherData] = useState({

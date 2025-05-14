@@ -3,7 +3,7 @@ import { Plus, Eye, Pencil } from "lucide-react";
 import RutinaModal from "../components/RutinasModal";
 import RutinaDetalleModal from "../components/RutinaDetalleModal";
 import type { RoutineResponse } from "@/utils/responseInterfaces";
-import RoutineService from "@/services/RoutineService";
+import RoutineService from "../services/RoutineService";
 
 // Tipo de rutina
 export type Rutina = {

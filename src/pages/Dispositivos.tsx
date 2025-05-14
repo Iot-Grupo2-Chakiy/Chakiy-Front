@@ -1,14 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import DispositivoModal from '../components/DispositivoModal';
-import { IoTDevicesService } from '../services/IoTDevicesService';
-
-
-
+import IoTDevicesService from '../services/IoTDevicesService';
 
 export default function Dispositivos() {
     const [modalAbierto, setModalAbierto] = useState(false);
-    const [dispositivos, setDispositivos] = useState<Dispositivo[]>(dispositivosMock);
+    const [dispositivos, setDispositivos] = useState([]);
     const [modoEdicion, setModoEdicion] = useState(false);
     const [dispositivoSeleccionado, setDispositivoSeleccionado] = useState<Dispositivo | null>(null);
 
