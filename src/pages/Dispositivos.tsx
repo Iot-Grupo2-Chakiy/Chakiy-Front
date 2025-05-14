@@ -5,7 +5,7 @@ import IoTDevicesService from '../services/IoTDevicesService';
 
 export default function Dispositivos() {
     const [modalAbierto, setModalAbierto] = useState(false);
-    const [dispositivos, setDispositivos] = useState([]);
+    const [dispositivos, setDispositivos] = useState<Dispositivo[]>([]);
     const [modoEdicion, setModoEdicion] = useState(false);
     const [dispositivoSeleccionado, setDispositivoSeleccionado] = useState<Dispositivo | null>(null);
 
@@ -71,7 +71,7 @@ export default function Dispositivos() {
         setDispositivoSeleccionado(null);
     };
 
-    const crearDispositivo = async (nuevoDispositivo) => {
+    const crearDispositivo = async (nuevoDispositivo: Dispositivo) => {
         try {
             await IoTDevicesService.createIoTDevice(nuevoDispositivo);
             setDispositivos((prev) => [
