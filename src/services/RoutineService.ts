@@ -1,11 +1,10 @@
 import type { CreateRoutineRequest, UpdateRoutineRequest } from "@/utils/requestInterfaces";
 import type { RoutineResponse } from "@/utils/responseInterfaces";
 
-const API_BASE_URL = "https://chakiyiotsupermain-aqd8ephjbra0e5bf.canadacentral-01.azurewebsites.net/api/v1/routine";
-
+//const API_BASE_URL = "https://chakiyiotsupermain-aqd8ephjbra0e5bf.canadacentral-01.azurewebsites.net/api/v1/routine";
+const API_BASE_URL = "http://localhost:8091/api/v1/routine";
 
 const RoutineService = {
-  // Obtener todas las rutinas
   async getAllRoutines(): Promise<RoutineResponse[]> {
     const response = await fetch(`${API_BASE_URL}`, {
       method: "GET",
@@ -16,7 +15,6 @@ const RoutineService = {
     return response.json();
   },
 
-  // Obtener una rutina por ID
   async getRoutineById(id: number): Promise<RoutineResponse> {
     const response = await fetch(`${API_BASE_URL}/${id}`, {
       method: "GET",
@@ -27,7 +25,6 @@ const RoutineService = {
     return response.json();
   },
 
-  // Crear una nueva rutina
   async createRoutine(
     resource: CreateRoutineRequest
   ): Promise<RoutineResponse> {
@@ -44,7 +41,6 @@ const RoutineService = {
     return response.json();
   },
 
-  // Actualizar una rutina existente
   async updateRoutine(
     id: number,
     resource: UpdateRoutineRequest

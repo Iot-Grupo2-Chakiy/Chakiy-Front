@@ -6,7 +6,7 @@ type Props = {
     onClose: () => void;
     dispositivo: Dispositivo | null;
     modoEdicion: boolean;
-    onCrear: (data: {  // Changed from onSave to onCrear to match usage
+    onCrear: (data: {
         name: string;
         temperaturaMin: number;
         temperaturaMax: number;
@@ -21,12 +21,12 @@ type Props = {
 export default function DispositivoModal({ isOpen, onClose, onCrear }: Props) {
     const [formData, setFormData] = useState({
         name: '',
-        temperaturaMin: 0,
-        temperaturaMax: 0,
-        calidadDeAireMin: 0,
-        calidadDeAireMax: 0,
-        humedadMin: 0,
-        humedadMax: 0,
+        temperaturaMin: undefined as number | undefined,
+        temperaturaMax: undefined as number | undefined,
+        calidadDeAireMin: undefined as number | undefined,
+        calidadDeAireMax: undefined as number | undefined,
+        humedadMin: undefined as number | undefined,
+        humedadMax: undefined as number | undefined,
         estado: false
     });
 
@@ -41,7 +41,7 @@ export default function DispositivoModal({ isOpen, onClose, onCrear }: Props) {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await onCrear(formData);
+            await onCrear(formData as any); // Cast to `any` to handle undefined values
             console.log('Device created successfully:', formData);
             onClose();
         } catch (error) {
@@ -72,7 +72,7 @@ export default function DispositivoModal({ isOpen, onClose, onCrear }: Props) {
                             type="number"
                             name="temperaturaMin"
                             placeholder="Temp Min"
-                            value={formData.temperaturaMin}
+                            value={formData.temperaturaMin || ''}
                             onChange={handleChange}
                             className="border px-4 py-2 rounded"
                             required
@@ -81,7 +81,7 @@ export default function DispositivoModal({ isOpen, onClose, onCrear }: Props) {
                             type="number"
                             name="temperaturaMax"
                             placeholder="Temp Max"
-                            value={formData.temperaturaMax}
+                            value={formData.temperaturaMax || ''}
                             onChange={handleChange}
                             className="border px-4 py-2 rounded"
                             required
@@ -93,7 +93,7 @@ export default function DispositivoModal({ isOpen, onClose, onCrear }: Props) {
                             type="number"
                             name="humedadMin"
                             placeholder="Humedad Min"
-                            value={formData.humedadMin}
+                            value={formData.humedadMin || ''}
                             onChange={handleChange}
                             className="border px-4 py-2 rounded"
                             required
@@ -102,7 +102,7 @@ export default function DispositivoModal({ isOpen, onClose, onCrear }: Props) {
                             type="number"
                             name="humedadMax"
                             placeholder="Humedad Max"
-                            value={formData.humedadMax}
+                            value={formData.humedadMax || ''}
                             onChange={handleChange}
                             className="border px-4 py-2 rounded"
                             required
@@ -114,7 +114,7 @@ export default function DispositivoModal({ isOpen, onClose, onCrear }: Props) {
                             type="number"
                             name="calidadDeAireMin"
                             placeholder="ICA Min"
-                            value={formData.calidadDeAireMin}
+                            value={formData.calidadDeAireMin || ''}
                             onChange={handleChange}
                             className="border px-4 py-2 rounded"
                             required
@@ -123,7 +123,7 @@ export default function DispositivoModal({ isOpen, onClose, onCrear }: Props) {
                             type="number"
                             name="calidadDeAireMax"
                             placeholder="ICA Max"
-                            value={formData.calidadDeAireMax}
+                            value={formData.calidadDeAireMax || ''}
                             onChange={handleChange}
                             className="border px-4 py-2 rounded"
                             required
