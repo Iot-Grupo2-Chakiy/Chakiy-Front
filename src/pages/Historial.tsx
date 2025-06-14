@@ -11,18 +11,6 @@ export type EventoHistorial = {
     condicion: string;
 };
 
-const historialMock: EventoHistorial[] = [
-    {
-        fecha: '10-05-2025',
-        hora: '18:30',
-        dispositivo: 'Purificador Dormitorio',
-        tipoEvento: 'Automatico',
-        origen: 'Rutina "Purificador Noche"',
-        umbrales: 'T 20–26°C | H 40–60% | ICA < 50',
-        condicion: 'Temperatura > 26°C',
-    },
-];
-
 export default function Historial() {
     const [eventoSeleccionado, setEventoSeleccionado] = useState<EventoHistorial | null>(null);
     const [verDetalle, setVerDetalle] = useState(false);
@@ -40,26 +28,6 @@ export default function Historial() {
                     </tr>
                     </thead>
                     <tbody>
-                    {historialMock.map((evento, i) => (
-                        <tr key={i} className="bg-gray-200 hover:bg-gray-300 text-sm">
-                            <td className="px-4 py-2 whitespace-nowrap">
-                                {evento.fecha} {evento.hora}
-                            </td>
-                            <td className="px-4 py-2">{evento.dispositivo}</td>
-                            <td className="px-4 py-2">{evento.tipoEvento}</td>
-                            <td className="px-4 py-2">
-                                <button
-                                    onClick={() => {
-                                        setEventoSeleccionado(evento);
-                                        setVerDetalle(true);
-                                    }}
-                                    className="text-gray-600 hover:text-sky-500"
-                                >
-                                    <Eye size={18} />
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
                     </tbody>
                 </table>
             </div>

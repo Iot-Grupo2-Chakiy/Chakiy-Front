@@ -1,6 +1,5 @@
 import type { RoutineResponse } from "@/utils/responseInterfaces";
 
-
 type Props = {
     isOpen: boolean;
     onClose: () => void;
@@ -9,6 +8,18 @@ type Props = {
 
 export default function RutinaDetalleModal({ isOpen, onClose, rutina }: Props) {
     if (!isOpen || !rutina) return null;
+
+    const daysTranslation: Record<string, string> = {
+        MONDAY: "Lunes",
+        TUESDAY: "Martes",
+        WEDNESDAY: "Miércoles",
+        THURSDAY: "Jueves",
+        FRIDAY: "Viernes",
+        SATURDAY: "Sábado",
+        SUNDAY: "Domingo",
+    };
+
+    const translatedDays = rutina.days.map((day) => daysTranslation[day] || day);
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
@@ -19,7 +30,7 @@ export default function RutinaDetalleModal({ isOpen, onClose, rutina }: Props) {
                     <p><strong>Nombre:</strong> {rutina.name}</p>
                     <p><strong>Dispositivo asociado:</strong> {rutina.device.name}</p>
                     <p><strong>Condición:</strong> {rutina.condition}</p>
-                    <p><strong>Días activos:</strong> {rutina.days.join(', ')}</p>
+                    <p><strong>Días activos:</strong> {translatedDays.join(', ')}</p>
                     <p><strong>Rango horario:</strong> {rutina.startTime} a {rutina.endTime}</p>
                     <p><strong>Ubicación:</strong> {rutina.ubication || 'N/A'}</p>
                 </div>
