@@ -14,4 +14,5 @@ export interface RoutineResponse {
   startTime: string;
   endTime: string;
   ubication?: string;
+  isDry?: boolean;
 }

@@ -9,12 +9,39 @@ export default function Dashboard() {
         humedad: 'Cargando...',
     });
     const [dispositivosEncendidos, setDispositivosEncendidos] = useState(0);
+    const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
 
-    useEffect(() => {
-        const fetchAndLogWeatherData = async () => {
+       const getUserLocation = () => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        setUserLocation({
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                        });
+                    },
+                    (error) => {
+                        console.error("Error getting user location:", error);
+                        alert("No se pudo obtener la ubicación. Usando valores predeterminados.");
+                        setUserLocation({
+                            latitude: -12.04318,
+                            longitude: -77.02824,
+                        });
+                    }
+                );
+            } else {
+                alert("La geolocalización no está soportada en este navegador.");
+                setUserLocation({
+                    latitude: -12.04318,
+                    longitude: -77.02824,
+                });
+            }
+        };
+
+        const fetchAndLogWeatherData = async (latitude: number, longitude: number) => {
             const params = {
-                latitude: -12.04318,
-                longitude: -77.02824,
+                latitude,
+                longitude,
                 hourly: ["temperature_2m", "relative_humidity_2m"],
                 current: ["temperature_2m", "relative_humidity_2m"],
                 forecast_days: 1,
@@ -24,7 +51,7 @@ export default function Dashboard() {
             try {
                 const responses = await fetchWeatherApi(url, params);
                 const response = responses[0];
-
+                console.log("Test")
                 const utcOffsetSeconds = response.utcOffsetSeconds();
                 const current = response.current()!;
 
@@ -43,6 +70,8 @@ export default function Dashboard() {
             }
         };
 
+
+    useEffect(() => {
         const fetchDispositivosEncendidos = async () => {
             try {
                 const dispositivos = await IoTDevicesService.getAllIoTDevices() as IoTDeviceResponse[];
@@ -55,9 +84,17 @@ export default function Dashboard() {
             }
         };
 
-        fetchAndLogWeatherData();
-        fetchDispositivosEncendidos();
-    }, []);
+        const intervalId = setInterval(() => {
+            if (userLocation) {
+                fetchAndLogWeatherData(userLocation.latitude, userLocation.longitude);
+            }
+            fetchDispositivosEncendidos();
+        }, 3000);
+
+        getUserLocation();
+
+        return () => clearInterval(intervalId);
+    }, [userLocation]);
 
     const data = {
         dispositivosEncendidos,

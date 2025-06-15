@@ -143,7 +143,6 @@ export default function Dispositivos() {
                         <p className="text-gray-700">Humedad: {disp.humedad}</p>
                         <p className="text-gray-700">ICA: {disp.ica}</p>
                         <p className="text-gray-600 mt-2 text-sm">Umbrales: {disp.umbrales}</p>
-                        <p className="text-gray-600 text-sm">Última acción: {disp.ultimaAccion}</p>
 
                         <div className="flex gap-2 mt-4">
                             <button
