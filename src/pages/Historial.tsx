@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import AuditTrailService from '../services/AuditTrailService';
+import IoTDevicesService from '../services/IoTDevicesService';
+import type { IoTDeviceResponse } from '@/utils/responseInterfaces.ts';
 
 export type EventoHistorial = {
     id: number;
@@ -9,14 +11,6 @@ export type EventoHistorial = {
     tipoEvento: 'Manual' | 'Automatico';
     origen: string;
     umbrales: string;
-};
-
-export type LogResource = {
-    id: number;
-    timestamp: string;
-    message: string;
-    level: string;
-    source: string;
 };
 
 export default function Historial() {
@@ -29,15 +23,32 @@ export default function Historial() {
             try {
                 const logs = await AuditTrailService.getAllLogs();
                 if (Array.isArray(logs)) {
-                    const formattedLogs: EventoHistorial[] = logs.map((log: any) => ({
-                        id: log.id,
-                        fecha: log.timestamp?.split('T')[0] || 'N/A',
-                        hora: log.timestamp?.split('T')[1]?.split('.')[0] || 'N/A',
-                        dispositivo: log.source || 'Desconocido',
-                        tipoEvento: log.level === 'INFO' ? 'Manual' : 'Automatico',
-                        origen: log.source || 'Desconocido',
-                        umbrales: 'N/A'
-                    }));
+                    const formattedLogs: EventoHistorial[] = await Promise.all(
+                        logs.map(async (log: any) => {
+                            let dispositivo = 'Desconocido';
+                            let umbrales = 'N/A';
+                            try {
+                                if (log.deviceId) {
+                                    const device = await IoTDevicesService.getIoTDeviceById(log.deviceId) as IoTDeviceResponse;
+                                    console.log(`Fetched device for log ${log.id}:`, device);
+                                    dispositivo = device?.name || 'Desconocido';
+                                    umbrales = `T ${device.temperaturaMin}–${device.temperaturaMax}°C | H ${device.humedadMin}–${device.humedadMax}% | ICA ${device.calidadDeAireMin}–${device.calidadDeAireMax}`;
+                                }
+                            } catch (error) {
+                                console.error(`Error fetching device for log ${log.id}:`, error);
+                            }
+
+                            return {
+                                id: log.id,
+                                fecha: log.timestamp?.split('T')[0] || 'N/A',
+                                hora: log.timestamp?.split('T')[1]?.split('.')[0] || 'N/A',
+                                dispositivo,
+                                tipoEvento: log.logType === 'MANUAL' ? 'Manual' : 'Automatico',
+                                origen: log.logType === 'MANUAL' ? 'Manual' : 'Automatico',
+                                umbrales,
+                            };
+                        })
+                    );
                     setEventos(formattedLogs);
                 } else {
                     console.error('Invalid logs format');
@@ -91,7 +102,7 @@ export default function Historial() {
                         <h2 className="text-lg font-bold mb-4">Detalles Historial</h2>
                         <p><strong>Tipo de evento:</strong> {eventoSeleccionado.tipoEvento === 'Automatico' ? 'Activación automática' : 'Activación manual'}</p>
                         <p><strong>Fecha y hora:</strong> {eventoSeleccionado.fecha}, {eventoSeleccionado.hora}</p>
-                        <p><strong>Origen:</strong> {eventoSeleccionado.origen}</p>
+                        <p><strong>Origen:</strong> {eventoSeleccionado.origen === 'Automatico' ? 'Rutina' : 'Usuario'}</p>
                         <p><strong>Dispositivo:</strong> {eventoSeleccionado.dispositivo}</p>
                         <p><strong>Umbrales configurados:</strong> {eventoSeleccionado.umbrales}</p>
                         <div className="flex justify-end mt-4">

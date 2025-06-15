@@ -53,9 +53,12 @@ const IoTDevicesService = {
   async getIoTDeviceById(id: number): Promise<object> {
     const response = await fetch(`${API_BASE_URL}/${id}`, {
       method: "GET",
+      headers: {
+        "Accept": "application/json",
+      },
     });
     if (!response.ok) {
-      throw new Error("Error fetching IoT device by ID");
+      throw new Error(`Error fetching IoT device by ID: ${response.status} ${response.statusText}`);
     }
     return response.json();
   },

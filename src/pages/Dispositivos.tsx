@@ -4,6 +4,8 @@ import DispositivoModal from '../components/DispositivoModal';
 import ConfirmarEliminacionModal from '../components/ConfirmarEliminacionModal';
 import IoTDevicesService from '../services/IoTDevicesService';
 import type { Dispositivo, DispositivoNuevo } from '../types/Dispositivo';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Dispositivos() {
     const [modalAbierto, setModalAbierto] = useState(false);
@@ -33,7 +35,7 @@ export default function Dispositivos() {
                 setDispositivos(formattedData);
             } catch (error) {
                 console.error('Error fetching devices:', error);
-                alert('Error al cargar los dispositivos.');
+                toast.error('Error al cargar los dispositivos.');
             }
         };
 
@@ -69,9 +71,10 @@ export default function Dispositivos() {
             };
             setDispositivos(prev => [...prev, nuevoDispositivo]);
             cerrarModal();
+            toast.success('Dispositivo creado exitosamente.');
         } catch (error) {
             console.error('Error creating device:', error);
-            alert('Error al crear el dispositivo.');
+            toast.error('Error al crear el dispositivo.');
         }
     };
 
@@ -83,9 +86,10 @@ export default function Dispositivos() {
             );
             setDispositivos(actualizados);
             cerrarModal();
+            toast.success('Dispositivo actualizado exitosamente.');
         } catch (error) {
             console.error('Error actualizando dispositivo:', error);
-            alert('No se pudo actualizar el dispositivo.');
+            toast.error('No se pudo actualizar el dispositivo.');
         }
     };
 
@@ -99,23 +103,36 @@ export default function Dispositivos() {
             setDispositivos(prev =>
                 prev.map(d => (d.id === id ? { ...d, activo: nuevoEstado } : d))
             );
+            toast.success(`Dispositivo ${nuevoEstado ? 'activado' : 'desactivado'} exitosamente.`);
         } catch (error) {
             console.error('Error al actualizar estado:', error);
-            alert('No se pudo actualizar el estado del dispositivo.');
+            toast.error('No se pudo actualizar el estado del dispositivo.');
         }
     };
 
     const actualizarMainDevice = async (id: number) => {
+        const dispositivo = dispositivos.find(d => d.id === id);
+        if (!dispositivo) return;
+
+        const nuevoValor = !dispositivo.isMainDevice;
+
         try {
-            await IoTDevicesService.updateIoTMainDeviceById(id, { isMainDevice: true });
+            await IoTDevicesService.updateIoTMainDeviceById(id, { isMainDevice: nuevoValor });
+
             setDispositivos(prev =>
-                prev.map(d => ({ ...d, isMainDevice: d.id === id }))
+                prev.map(d =>
+                    d.id === id ? { ...d, isMainDevice: nuevoValor } : d
+                )
             );
+
+            toast.success(`Dispositivo ${nuevoValor ? 'marcado como favorito' : 'ya no es favorito'}.`);
         } catch (error) {
-            console.error('Error actualizando mainDevice:', error);
-            alert('No se pudo establecer como principal.');
+            console.error('Error actualizando isMainDevice:', error);
+            toast.error('No se pudo actualizar el estado de favorito.');
         }
     };
+
+
 
     const eliminarDispositivo = async () => {
         if (!dispositivoAEliminar) return;
@@ -124,94 +141,98 @@ export default function Dispositivos() {
             setDispositivos(prev => prev.filter(d => d.id !== dispositivoAEliminar.id));
             setModalEliminarAbierto(false);
             setDispositivoAEliminar(null);
+            toast.success('Dispositivo eliminado exitosamente.');
         } catch (error) {
             console.error('Error eliminando dispositivo:', error);
-            alert('No se pudo eliminar el dispositivo.');
+            toast.error('No se pudo eliminar el dispositivo.');
         }
     };
 
     return (
-        <div className="space-y-6">
-            <button
-                onClick={() => abrirModal('nuevo')}
-                className="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded font-semibold flex items-center gap-2"
-            >
-                <Plus size={18} />
-                Nuevo
-            </button>
+        <>
+            <ToastContainer />
+            <div className="space-y-6">
+                <button
+                    onClick={() => abrirModal('nuevo')}
+                    className="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded font-semibold flex items-center gap-2"
+                >
+                    <Plus size={18} />
+                    Nuevo
+                </button>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {dispositivos.map((disp) => (
-                    <div
-                        key={disp.id}
-                        className={`shadow-md rounded-lg p-4 relative transition-colors ${disp.activo ? 'bg-green-100' : 'bg-white'}`}
-                    >
-                        <div className="absolute top-2 right-2 cursor-pointer">
-                            {disp.isMainDevice ? (
-                                <Star
-                                    size={20}
-                                    className="text-yellow-500"
-                                    onClick={() => actualizarMainDevice(disp.id)}
-                                />
-                            ) : (
-                                <StarOff
-                                    size={20}
-                                    className="text-gray-400 hover:text-yellow-500"
-                                    onClick={() => actualizarMainDevice(disp.id)}
-                                />
-                            )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {dispositivos.map((disp) => (
+                        <div
+                            key={disp.id}
+                            className={`shadow-md rounded-lg p-4 relative transition-colors ${disp.activo ? 'bg-green-100' : 'bg-white'}`}
+                        >
+                            <div className="absolute top-2 right-2 cursor-pointer">
+                                {disp.isMainDevice ? (
+                                    <Star
+                                        size={20}
+                                        className="text-yellow-500"
+                                        onClick={() => actualizarMainDevice(disp.id)}
+                                    />
+                                ) : (
+                                    <StarOff
+                                        size={20}
+                                        className="text-gray-400 hover:text-yellow-500"
+                                        onClick={() => actualizarMainDevice(disp.id)}
+                                    />
+                                )}
+                            </div>
+
+                            <img className="w-full h-32 object-contain mb-3" src={disp.imagen} alt={`Imagen de ${disp.nombre}`} />
+                            <h2 className="text-lg font-bold mb-2">{disp.nombre}</h2>
+                            <p className="text-gray-700">Estado: {disp.activo ? 'Activo' : 'Desactivado'}</p>
+                            <p className="text-gray-700">Temp: {disp.temperatura}</p>
+                            <p className="text-gray-700">Humedad: {disp.humedad}</p>
+                            <p className="text-gray-700">ICA: {disp.ica}</p>
+                            <p className="text-gray-600 mt-2 text-sm">Umbrales: {disp.umbrales}</p>
+
+                            <div className="flex gap-2 mt-4">
+                                <button
+                                    onClick={() => toggleActivacion(disp.id)}
+                                    className={`text-white text-sm px-3 py-1 rounded transition-colors ${disp.activo ? 'bg-red-500 hover:bg-red-600' : 'bg-sky-500 hover:bg-sky-600'}`}
+                                >
+                                    {disp.activo ? 'Desactivar' : 'Activar'}
+                                </button>
+                                <button
+                                    onClick={() => abrirModal('editar', disp)}
+                                    className="bg-blue-400 text-white text-sm px-3 py-1 rounded hover:bg-blue-500"
+                                >
+                                    Editar
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setDispositivoAEliminar(disp);
+                                        setModalEliminarAbierto(true);
+                                    }}
+                                    className="bg-red-400 text-white text-sm px-3 py-1 rounded hover:bg-red-500"
+                                >
+                                    Eliminar
+                                </button>
+                            </div>
                         </div>
+                    ))}
+                </div>
 
-                        <img className="w-full h-32 object-contain mb-3" src={disp.imagen} alt={`Imagen de ${disp.nombre}`} />
-                        <h2 className="text-lg font-bold mb-2">{disp.nombre}</h2>
-                        <p className="text-gray-700">Estado: {disp.activo ? 'Activo' : 'Desactivado'}</p>
-                        <p className="text-gray-700">Temp: {disp.temperatura}</p>
-                        <p className="text-gray-700">Humedad: {disp.humedad}</p>
-                        <p className="text-gray-700">ICA: {disp.ica}</p>
-                        <p className="text-gray-600 mt-2 text-sm">Umbrales: {disp.umbrales}</p>
+                <DispositivoModal
+                    isOpen={modalAbierto}
+                    onClose={cerrarModal}
+                    dispositivo={dispositivoSeleccionado}
+                    modoEdicion={modoEdicion}
+                    onCrear={crearDispositivo}
+                    onEditar={editarDispositivo}
+                />
 
-                        <div className="flex gap-2 mt-4">
-                            <button
-                                onClick={() => toggleActivacion(disp.id)}
-                                className={`text-white text-sm px-3 py-1 rounded transition-colors ${disp.activo ? 'bg-red-500 hover:bg-red-600' : 'bg-sky-500 hover:bg-sky-600'}`}
-                            >
-                                {disp.activo ? 'Desactivar' : 'Activar'}
-                            </button>
-                            <button
-                                onClick={() => abrirModal('editar', disp)}
-                                className="bg-blue-400 text-white text-sm px-3 py-1 rounded hover:bg-blue-500"
-                            >
-                                Editar
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setDispositivoAEliminar(disp);
-                                    setModalEliminarAbierto(true);
-                                }}
-                                className="bg-red-400 text-white text-sm px-3 py-1 rounded hover:bg-red-500"
-                            >
-                                Eliminar
-                            </button>
-                        </div>
-                    </div>
-                ))}
+                <ConfirmarEliminacionModal
+                    isOpen={modalEliminarAbierto}
+                    onClose={() => setModalEliminarAbierto(false)}
+                    onConfirm={eliminarDispositivo}
+                    nombreDispositivo={dispositivoAEliminar?.nombre || ''}
+                />
             </div>
-
-            <DispositivoModal
-                isOpen={modalAbierto}
-                onClose={cerrarModal}
-                dispositivo={dispositivoSeleccionado}
-                modoEdicion={modoEdicion}
-                onCrear={crearDispositivo}
-                onEditar={editarDispositivo}
-            />
-
-            <ConfirmarEliminacionModal
-                isOpen={modalEliminarAbierto}
-                onClose={() => setModalEliminarAbierto(false)}
-                onConfirm={eliminarDispositivo}
-                nombreDispositivo={dispositivoAEliminar?.nombre || ''}
-            />
-        </div>
+        </>
     );
 }

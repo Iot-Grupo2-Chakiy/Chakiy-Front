@@ -3,11 +3,14 @@ import type { IoTDeviceResponse, RoutineResponse } from "@/utils/responseInterfa
 import { useEffect, useMemo, useState } from "react";
 import Combobox from "./ui/Combobox";
 import RoutineService from "@/services/RoutineService";
-
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 type Props = {
   isOpen: boolean;
   onClose: () => void;
   rutinaEditar?: RoutineResponse | null;
+  onCrear: (nuevaRutina: RoutineResponse) => Promise<void>;
+  onEditar: (id: number, rutinaActualizada: RoutineResponse) => Promise<void>;
 };
 
 export default function RutinaModal({ isOpen, onClose, rutinaEditar }: Props) {
@@ -68,12 +71,17 @@ export default function RutinaModal({ isOpen, onClose, rutinaEditar }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    try {
-      if (!formData.device) {
-        console.error("Falta el dispositivo");
-        return;
-      }
+    if (!formData.device) {
+      toast.error("Falta el dispositivo");
+      return;
+    }
 
+    if (formData.endTime <= formData.startTime) {
+      toast.error("La hora de fin debe ser mayor que la hora de inicio.");
+      return;
+    }
+
+    try {
       const routineData = {
         name: formData.name,
         deviceId: formData.device.id,
@@ -87,15 +95,15 @@ export default function RutinaModal({ isOpen, onClose, rutinaEditar }: Props) {
 
       if (rutinaEditar) {
         await RoutineService.updateRoutine(rutinaEditar.id!, routineData);
-        alert("Rutina actualizada exitosamente");
+        toast.success("Rutina actualizada exitosamente");
       } else {
         await RoutineService.createRoutine(routineData);
-        alert("Rutina creada exitosamente");
+        toast.success("Rutina creada exitosamente");
       }
 
       onClose();
     } catch {
-      alert("Error al procesar la rutina. Por favor, inténtalo de nuevo.");
+      toast.error("Error al procesar la rutina. Por favor, inténtalo de nuevo.");
     }
   };
 
@@ -117,162 +125,156 @@ export default function RutinaModal({ isOpen, onClose, rutinaEditar }: Props) {
         formData.days.length > 0 &&
         formData.startTime &&
         formData.endTime &&
-        formData.ubication.trim()
+        formData.ubication.trim() &&
+        formData.endTime > formData.startTime
     );
   }, [formData]);
+
   const cargarDispositivos = async () => {
     try {
       const data = await IoTDevicesService.getAllIoTDevices() as IoTDeviceResponse[];
       setIoTDevices(data);
     } catch {
-      alert("Error al cargar los dispositivos. Por favor, inténtalo de nuevo.");
+      toast.error("Error al cargar los dispositivos. Por favor, inténtalo de nuevo.");
     }
   };
+
   useEffect(() => {
     cargarDispositivos();
   }, []);
 
   return (
-      <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-        <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-lg">
-          <h2 className="text-lg font-bold mb-4">Agregar / Editar Rutina</h2>
+      <>
+        <ToastContainer />
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-lg">
+            <h2 className="text-lg font-bold mb-4">Agregar / Editar Rutina</h2>
 
-          <form className="space-y-4 text-sm" onSubmit={handleSubmit}>
-            <input
-                type="text"
-                name="name"
-                placeholder="Nombre"
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full border px-4 py-2 rounded"
-                required
-            />
-            <div>
-              <label htmlFor="device" className="block text-sm mb-2">
-                Dispositivo:
-              </label>
-              <Combobox<IoTDeviceResponse>
-                  items={iotDevices}
-                  value={formData.device}
-                  onChange={(device) => {
-                    setFormData((prev) => ({
-                      ...prev,
-                      device,
-                    }));
-                  }}
-                  getDisplayValue={(device) => device.name}
-                  placeholder="Buscar dispositivo..."
-                  renderItem={(device) => (
-                      <div className="flex justify-between items-center">
-                        <span>{device.name}</span>
-                        <span
-                            className={`text-xs px-2 py-1 rounded ${
-                                device.estado
-                                    ? "bg-green-100 text-green-800"
-                                    : "bg-red-100 text-red-800"
-                            }`}
-                        >
-                    {device.estado ? "Activo" : "Inactivo"}
-                  </span>
-                      </div>
-                  )}
+            <form className="space-y-4 text-sm" onSubmit={handleSubmit}>
+              <input
+                  type="text"
+                  name="name"
+                  placeholder="Nombre"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="w-full border px-4 py-2 rounded"
+                  required
               />
-            </div>
-            <input
-                type="text"
-                name="condition"
-                placeholder="Condición (Temp > 20)"
-                value={formData.condition}
-                onChange={handleChange}
-                className="w-full border px-4 py-2 rounded"
-                required
-            />
-            <div className="border rounded p-3">
-              <p className="mb-2 text-sm">Seleccione los días:</p>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {[
-                  { value: "MONDAY", label: "Lunes" },
-                  { value: "TUESDAY", label: "Martes" },
-                  { value: "WEDNESDAY", label: "Miércoles" },
-                  { value: "THURSDAY", label: "Jueves" },
-                  { value: "FRIDAY", label: "Viernes" },
-                  { value: "SATURDAY", label: "Sábado" },
-                  { value: "SUNDAY", label: "Domingo" },
-                ].map((day) => (
-                    <label
-                        key={day.value}
-                        className="flex items-center space-x-2 cursor-pointer"
-                    >
-                      <input
-                          type="checkbox"
-                          checked={formData.days.includes(day.value)}
-                          onChange={() => toggleDay(day.value)}
-                          className="rounded text-sky-500"
-                      />
-                      <span>{day.label}</span>
-                    </label>
-                ))}
+              <div>
+                <label htmlFor="device" className="block text-sm mb-2">Dispositivo:</label>
+                <Combobox<IoTDeviceResponse>
+                    items={iotDevices}
+                    value={formData.device}
+                    onChange={(device) => {
+                      setFormData((prev) => ({ ...prev, device }));
+                    }}
+                    getDisplayValue={(device) => device.name}
+                    placeholder="Buscar dispositivo..."
+                    renderItem={(device) => (
+                        <div className="flex justify-between items-center">
+                          <span>{device.name}</span>
+                          <span className={`text-xs px-2 py-1 rounded ${
+                              device.estado ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                          }`}>
+                      {device.estado ? "Activo" : "Inactivo"}
+                    </span>
+                        </div>
+                    )}
+                />
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
               <input
-                  type="time"
-                  name="startTime"
-                  placeholder="Hora Inicio"
-                  value={formData.startTime}
+                  type="text"
+                  name="condition"
+                  placeholder="Condición (Temp > 20)"
+                  value={formData.condition}
                   onChange={handleChange}
-                  className="border px-4 py-2 rounded"
+                  className="w-full border px-4 py-2 rounded"
                   required
               />
+              <div className="border rounded p-3">
+                <p className="mb-2 text-sm">Seleccione los días:</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {[
+                    { value: "MONDAY", label: "Lunes" },
+                    { value: "TUESDAY", label: "Martes" },
+                    { value: "WEDNESDAY", label: "Miércoles" },
+                    { value: "THURSDAY", label: "Jueves" },
+                    { value: "FRIDAY", label: "Viernes" },
+                    { value: "SATURDAY", label: "Sábado" },
+                    { value: "SUNDAY", label: "Domingo" },
+                  ].map((day) => (
+                      <label key={day.value} className="flex items-center space-x-2 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={formData.days.includes(day.value)}
+                            onChange={() => toggleDay(day.value)}
+                            className="rounded text-sky-500"
+                        />
+                        <span>{day.label}</span>
+                      </label>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <input
+                    type="time"
+                    name="startTime"
+                    step="600"
+                    placeholder="Hora Inicio"
+                    value={formData.startTime}
+                    onChange={handleChange}
+                    className="border px-4 py-2 rounded"
+                    required
+                />
+                <input
+                    type="time"
+                    name="endTime"
+                    step="600"
+                    placeholder="Hora Fin"
+                    value={formData.endTime}
+                    onChange={handleChange}
+                    className="border px-4 py-2 rounded"
+                    required
+                />
+              </div>
               <input
-                  type="time"
-                  name="endTime"
-                  placeholder="Hora Fin"
-                  value={formData.endTime}
+                  type="text"
+                  name="ubication"
+                  placeholder="Ubicación"
+                  value={formData.ubication}
                   onChange={handleChange}
-                  className="border px-4 py-2 rounded"
+                  className="w-full border px-4 py-2 rounded"
                   required
               />
-            </div>
-            <input
-                type="text"
-                name="ubication"
-                placeholder="Ubicación"
-                value={formData.ubication}
-                onChange={handleChange}
-                className="w-full border px-4 py-2 rounded"
-                required
-            />
-            <div className="flex items-center space-x-2">
-              <input
-                  type="checkbox"
-                  name="isDry"
-                  checked={formData.isDry}
-                  onChange={handleChange}
-                  className="rounded text-sky-500"
-              />
-              <label htmlFor="isDry" className="text-sm">
-                ¿Adaptado para secar?
-              </label>
-            </div>
-            <div className="flex justify-end gap-4 pt-4">
-              <button
-                  type="button"
-                  onClick={onClose}
-                  className="bg-sky-100 text-sky-600 px-4 py-2 rounded font-semibold"
-              >
-                Cancelar
-              </button>
-              <button
-                  type="submit"
-                  className="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded font-semibold"
-                  disabled={!isFormValid}
-              >
-                Guardar
-              </button>
-            </div>
-          </form>
+              <div className="flex items-center space-x-2">
+                <input
+                    type="checkbox"
+                    name="isDry"
+                    checked={formData.isDry}
+                    onChange={handleChange}
+                    className="rounded text-sky-500"
+                />
+                <label htmlFor="isDry" className="text-sm">¿Adaptado para secar?</label>
+              </div>
+              <div className="flex justify-end gap-4 pt-4">
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className="bg-sky-100 text-sky-600 px-4 py-2 rounded font-semibold"
+                >
+                  Cancelar
+                </button>
+                <button
+                    type="submit"
+                    className="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded font-semibold"
+                    disabled={!isFormValid}
+                >
+                  Guardar
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
+      </>
   );
 }

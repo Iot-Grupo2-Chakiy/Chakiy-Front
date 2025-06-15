@@ -11,33 +11,6 @@ export default function Dashboard() {
     const [dispositivosEncendidos, setDispositivosEncendidos] = useState(0);
     const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
 
-       const getUserLocation = () => {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        setUserLocation({
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude,
-                        });
-                    },
-                    (error) => {
-                        console.error("Error getting user location:", error);
-                        alert("No se pudo obtener la ubicación. Usando valores predeterminados.");
-                        setUserLocation({
-                            latitude: -12.04318,
-                            longitude: -77.02824,
-                        });
-                    }
-                );
-            } else {
-                alert("La geolocalización no está soportada en este navegador.");
-                setUserLocation({
-                    latitude: -12.04318,
-                    longitude: -77.02824,
-                });
-            }
-        };
-
         const fetchAndLogWeatherData = async (latitude: number, longitude: number) => {
             const params = {
                 latitude,
@@ -84,6 +57,34 @@ export default function Dashboard() {
             }
         };
 
+        const getUserLocation = () => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        setUserLocation({
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                        });
+                    },
+                    (error) => {
+                        console.error('Error fetching user location:', error);
+                        // Use hardcoded location if geolocation fails
+                        setUserLocation({
+                            latitude: 40.7128,
+                            longitude: -74.0060,
+                        });
+                    },
+                    { timeout: 10000 }
+                );
+            } else {
+                console.warn('Geolocation is not supported by this browser.');
+                setUserLocation({
+                    latitude: 40.7128,
+                    longitude: -74.0060,
+                });
+            }
+        };
+
         const intervalId = setInterval(() => {
             if (userLocation) {
                 fetchAndLogWeatherData(userLocation.latitude, userLocation.longitude);
@@ -124,7 +125,7 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            <h2 className="text-xl font-bold text-sky-700">Dispositivo Principal</h2>
+            <h2 className="text-xl font-bold text-sky-700">Datos de los sensores en tu hogar</h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 {data.sensores.map((sensor) => (

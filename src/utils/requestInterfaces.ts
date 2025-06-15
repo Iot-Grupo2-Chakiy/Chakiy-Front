@@ -1,4 +1,4 @@
-
+// En requestInterfaces.ts
 export interface CreateRoutineRequest {
   name: string;
   deviceId: number;
@@ -7,6 +7,7 @@ export interface CreateRoutineRequest {
   startTime: string;
   endTime: string;
   ubication?: string;
+  isDry?: boolean;
 }
 
 export interface UpdateRoutineRequest {
@@ -16,5 +17,6 @@ export interface UpdateRoutineRequest {
   days: string[];
   startTime: string;
   endTime: string;
-  ubication?: string;
+  ubication: string;
+  isDry: boolean;
 }
