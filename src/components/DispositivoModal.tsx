@@ -1,38 +1,67 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Dispositivo } from '../types/Dispositivo';
+
+type FormData = {
+    name: string;
+    temperaturaMin: number;
+    temperaturaMax: number;
+    calidadDeAireMin: number;
+    calidadDeAireMax: number;
+    humedadMin: number;
+    humedadMax: number;
+    estado: boolean;
+};
 
 type Props = {
     isOpen: boolean;
     onClose: () => void;
     dispositivo: Dispositivo | null;
     modoEdicion: boolean;
-    onCrear: (data: {
-        name: string;
-        temperaturaMin: number;
-        temperaturaMax: number;
-        calidadDeAireMin: number;
-        calidadDeAireMax: number;
-        humedadMin: number;
-        humedadMax: number;
-        estado: boolean;
-    }) => Promise<void>;
+    onCrear: (data: FormData) => Promise<void>;
+    onEditar?: (id: number, data: FormData) => Promise<void>;
 };
 
-export default function DispositivoModal({ isOpen, onClose, onCrear }: Props) {
-    const [formData, setFormData] = useState({
+export default function DispositivoModal({ isOpen, onClose, dispositivo, modoEdicion, onCrear, onEditar }: Props) {
+    const [formData, setFormData] = useState<FormData>({
         name: '',
-        temperaturaMin: undefined as number | undefined,
-        temperaturaMax: undefined as number | undefined,
-        calidadDeAireMin: undefined as number | undefined,
-        calidadDeAireMax: undefined as number | undefined,
-        humedadMin: undefined as number | undefined,
-        humedadMax: undefined as number | undefined,
-        estado: false
+        temperaturaMin: 0,
+        temperaturaMax: 0,
+        calidadDeAireMin: 0,
+        calidadDeAireMax: 0,
+        humedadMin: 0,
+        humedadMax: 0,
+        estado: false,
     });
+
+    useEffect(() => {
+        if (dispositivo && modoEdicion) {
+            setFormData({
+                name: dispositivo.nombre ?? '',
+                temperaturaMin: dispositivo.temperaturaMin || 0,
+                temperaturaMax: dispositivo.temperaturaMax || 0,
+                calidadDeAireMin: dispositivo.calidadDeAireMin || 0,
+                calidadDeAireMax: dispositivo.calidadDeAireMax || 0,
+                humedadMin: dispositivo.humedadMin || 0,
+                humedadMax: dispositivo.humedadMax || 0,
+                estado: dispositivo.activo ?? false,
+            });
+        } else {
+            setFormData({
+                name: '',
+                temperaturaMin: 0,
+                temperaturaMax: 0,
+                calidadDeAireMin: 0,
+                calidadDeAireMax: 0,
+                humedadMin: 0,
+                humedadMax: 0,
+                estado: false,
+            });
+        }
+    }, [dispositivo, modoEdicion]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({
+        setFormData((prev: FormData) => ({
             ...prev,
             [name]: name === 'name' ? value : parseFloat(value),
         }));
@@ -40,12 +69,10 @@ export default function DispositivoModal({ isOpen, onClose, onCrear }: Props) {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        try {
-            await onCrear(formData as any); // Cast to `any` to handle undefined values
-            console.log('Device created successfully:', formData);
-            onClose();
-        } catch (error) {
-            console.error('Error creating device:', error);
+        if (modoEdicion && dispositivo && onEditar) {
+            await onEditar(dispositivo.id, formData);
+        } else {
+            await onCrear(formData);
         }
     };
 
@@ -54,8 +81,7 @@ export default function DispositivoModal({ isOpen, onClose, onCrear }: Props) {
     return (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center">
             <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-xl">
-                <h2 className="text-lg font-bold mb-4">Agregar / Editar Dispositivo</h2>
-
+                <h2 className="text-lg font-bold mb-4">{modoEdicion ? 'Editar' : 'Agregar'} Dispositivo</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <input
                         type="text"
@@ -66,7 +92,6 @@ export default function DispositivoModal({ isOpen, onClose, onCrear }: Props) {
                         className="w-full border px-4 py-2 rounded"
                         required
                     />
-
                     <div className="grid grid-cols-2 gap-4">
                         <input
                             type="number"
@@ -87,7 +112,6 @@ export default function DispositivoModal({ isOpen, onClose, onCrear }: Props) {
                             required
                         />
                     </div>
-
                     <div className="grid grid-cols-2 gap-4">
                         <input
                             type="number"
@@ -108,7 +132,6 @@ export default function DispositivoModal({ isOpen, onClose, onCrear }: Props) {
                             required
                         />
                     </div>
-
                     <div className="grid grid-cols-2 gap-4">
                         <input
                             type="number"
@@ -129,7 +152,6 @@ export default function DispositivoModal({ isOpen, onClose, onCrear }: Props) {
                             required
                         />
                     </div>
-
                     <div className="flex justify-end gap-4 mt-4">
                         <button
                             type="button"

@@ -18,7 +18,7 @@ export interface Dispositivo {
     ultimaAccion?: string;
     imagen?: string;
     activo?: boolean;
+    isMainDevice?: boolean;
 }
 
-// Tipo para crear nuevos dispositivos (sin id)
 export type DispositivoNuevo = Omit<Dispositivo, 'id' | 'temperatura' | 'humedad' | 'ica' | 'umbrales' | 'ultimaAccion' | 'imagen' | 'activo'>;

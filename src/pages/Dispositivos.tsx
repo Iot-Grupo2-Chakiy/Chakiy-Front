@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Star, StarOff } from 'lucide-react';
 import DispositivoModal from '../components/DispositivoModal';
+import ConfirmarEliminacionModal from '../components/ConfirmarEliminacionModal';
 import IoTDevicesService from '../services/IoTDevicesService';
 import type { Dispositivo, DispositivoNuevo } from '../types/Dispositivo';
 
@@ -9,31 +10,25 @@ export default function Dispositivos() {
     const [dispositivos, setDispositivos] = useState<Dispositivo[]>([]);
     const [modoEdicion, setModoEdicion] = useState(false);
     const [dispositivoSeleccionado, setDispositivoSeleccionado] = useState<Dispositivo | null>(null);
+    const [modalEliminarAbierto, setModalEliminarAbierto] = useState(false);
+    const [dispositivoAEliminar, setDispositivoAEliminar] = useState<Dispositivo | null>(null);
 
     useEffect(() => {
         const fetchDispositivos = async () => {
             try {
                 const data = await IoTDevicesService.getAllIoTDevices() as Dispositivo[];
-                console.log('Datos obtenidos del backend:', data);
                 const formattedData = data.map((device: Dispositivo) => ({
-                    id: device.id,
-                    name: device.name,
+                    ...device,
                     nombre: device.name,
                     descripcion: device.descripcion || 'Sin descripción',
-                    temperaturaMin: device.temperaturaMin,
-                    temperaturaMax: device.temperaturaMax,
-                    humedadMin: device.humedadMin,
-                    humedadMax: device.humedadMax,
-                    calidadDeAireMin: device.calidadDeAireMin,
-                    calidadDeAireMax: device.calidadDeAireMax,
-                    estado: device.estado,
                     temperatura: `T ${device.temperaturaMin}–${device.temperaturaMax}°C`,
                     humedad: `H ${device.humedadMin}–${device.humedadMax}%`,
                     ica: `ICA ${device.calidadDeAireMin}–${device.calidadDeAireMax}`,
                     umbrales: `T ${device.temperaturaMin}–${device.temperaturaMax}°C | H ${device.humedadMin}–${device.humedadMax}% | ICA ${device.calidadDeAireMin}–${device.calidadDeAireMax}`,
                     ultimaAccion: 'N/A',
                     imagen: 'device-placeholder.svg',
-                    activo: device.estado
+                    activo: device.estado,
+                    isMainDevice: device.isMainDevice || false
                 }));
                 setDispositivos(formattedData);
             } catch (error) {
@@ -46,32 +41,9 @@ export default function Dispositivos() {
     }, []);
 
     const abrirModal = (modo: 'nuevo' | 'editar', dispositivo?: Dispositivo | null) => {
-    setModoEdicion(modo === 'editar');
-    setDispositivoSeleccionado(dispositivo || null);
-    setModalAbierto(true);
-};
-
-    const toggleActivacion = async (id: number) => {
-        setDispositivos((prev) =>
-            prev.map((d) => {
-                if (d.id === id) {
-                    const nuevoEstado = d.activo === undefined || d.activo === null ? true : !d.activo;
-                    return { ...d, activo: nuevoEstado };
-                }
-                return d;
-            })
-        );
-
-        try {
-            const dispositivo = dispositivos.find((d) => d.id === id);
-            const nuevoEstado = dispositivo?.activo === undefined || dispositivo?.activo === null ? true : !dispositivo.activo;
-
-            await IoTDevicesService.updateIoTDeviceEstado(id, { estado: nuevoEstado });
-            console.log(`Estado del dispositivo con ID ${id} actualizado a: ${nuevoEstado}`);
-        } catch (error) {
-            console.error('Error al actualizar el estado del dispositivo:', error);
-            alert('No se pudo actualizar el estado del dispositivo.');
-        }
+        setModoEdicion(modo === 'editar');
+        setDispositivoSeleccionado(dispositivo || null);
+        setModalAbierto(true);
     };
 
     const cerrarModal = () => {
@@ -82,28 +54,19 @@ export default function Dispositivos() {
     const crearDispositivo = async (datosDispositivo: DispositivoNuevo) => {
         try {
             await IoTDevicesService.createIoTDevice(datosDispositivo);
-            
             const nuevoDispositivo: Dispositivo = {
-                id: dispositivos.length + 1, // Mantenemos el ID temporal
-                name: datosDispositivo.name,
+                ...datosDispositivo,
+                id: dispositivos.length + 1,
                 nombre: datosDispositivo.name,
-                descripcion: datosDispositivo.descripcion || 'Sin descripción',
-                temperaturaMin: datosDispositivo.temperaturaMin,
-                temperaturaMax: datosDispositivo.temperaturaMax,
-                humedadMin: datosDispositivo.humedadMin,
-                humedadMax: datosDispositivo.humedadMax,
-                calidadDeAireMin: datosDispositivo.calidadDeAireMin,
-                calidadDeAireMax: datosDispositivo.calidadDeAireMax,
-                estado: datosDispositivo.estado,
                 temperatura: `T ${datosDispositivo.temperaturaMin}–${datosDispositivo.temperaturaMax}°C`,
                 humedad: `H ${datosDispositivo.humedadMin}–${datosDispositivo.humedadMax}%`,
                 ica: `ICA ${datosDispositivo.calidadDeAireMin}–${datosDispositivo.calidadDeAireMax}`,
                 umbrales: `T ${datosDispositivo.temperaturaMin}–${datosDispositivo.temperaturaMax}°C | H ${datosDispositivo.humedadMin}–${datosDispositivo.humedadMax}% | ICA ${datosDispositivo.calidadDeAireMin}–${datosDispositivo.calidadDeAireMax}`,
                 ultimaAccion: 'N/A',
                 imagen: 'device-placeholder.svg',
-                activo: true
+                activo: false,
+                isMainDevice: false
             };
-
             setDispositivos(prev => [...prev, nuevoDispositivo]);
             cerrarModal();
         } catch (error) {
@@ -112,33 +75,96 @@ export default function Dispositivos() {
         }
     };
 
+    const editarDispositivo = async (id: number, data: DispositivoNuevo) => {
+        try {
+            await IoTDevicesService.updateIoTDeviceById(id, data);
+            const actualizados = dispositivos.map(d =>
+                d.id === id ? { ...d, ...data, nombre: data.name, activo: data.estado } : d
+            );
+            setDispositivos(actualizados);
+            cerrarModal();
+        } catch (error) {
+            console.error('Error actualizando dispositivo:', error);
+            alert('No se pudo actualizar el dispositivo.');
+        }
+    };
+
+    const toggleActivacion = async (id: number) => {
+        const dispositivo = dispositivos.find(d => d.id === id);
+        if (!dispositivo) return;
+        const nuevoEstado = !dispositivo.activo;
+
+        try {
+            await IoTDevicesService.updateIoTDeviceEstado(id, { estado: nuevoEstado });
+            setDispositivos(prev =>
+                prev.map(d => (d.id === id ? { ...d, activo: nuevoEstado } : d))
+            );
+        } catch (error) {
+            console.error('Error al actualizar estado:', error);
+            alert('No se pudo actualizar el estado del dispositivo.');
+        }
+    };
+
+    const actualizarMainDevice = async (id: number) => {
+        try {
+            await IoTDevicesService.updateIoTMainDeviceById(id, { isMainDevice: true });
+            setDispositivos(prev =>
+                prev.map(d => ({ ...d, isMainDevice: d.id === id }))
+            );
+        } catch (error) {
+            console.error('Error actualizando mainDevice:', error);
+            alert('No se pudo establecer como principal.');
+        }
+    };
+
+    const eliminarDispositivo = async () => {
+        if (!dispositivoAEliminar) return;
+        try {
+            await IoTDevicesService.deleteIoTDeviceById(dispositivoAEliminar.id);
+            setDispositivos(prev => prev.filter(d => d.id !== dispositivoAEliminar.id));
+            setModalEliminarAbierto(false);
+            setDispositivoAEliminar(null);
+        } catch (error) {
+            console.error('Error eliminando dispositivo:', error);
+            alert('No se pudo eliminar el dispositivo.');
+        }
+    };
+
     return (
         <div className="space-y-6">
-            <div>
-                <button
-                    onClick={() => abrirModal('nuevo')}
-                    className="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded font-semibold flex items-center gap-2"
-                >
-                    <Plus size={18} />
-                    Nuevo
-                </button>
-            </div>
+            <button
+                onClick={() => abrirModal('nuevo')}
+                className="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded font-semibold flex items-center gap-2"
+            >
+                <Plus size={18} />
+                Nuevo
+            </button>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {dispositivos.map((disp) => (
                     <div
-                                key={disp.id}
-                                className={`shadow-md rounded-lg p-4 transition-colors ${
-                                    disp.activo ? 'bg-green-100' : 'bg-white'
-                                }`}
-                            >
-                        <img
-                            className="w-full h-32 object-contain mb-3"
-                            src={disp.imagen}
-                            alt={`Imagen de ${disp.nombre}`}
-                        />
+                        key={disp.id}
+                        className={`shadow-md rounded-lg p-4 relative transition-colors ${disp.activo ? 'bg-green-100' : 'bg-white'}`}
+                    >
+                        <div className="absolute top-2 right-2 cursor-pointer">
+                            {disp.isMainDevice ? (
+                                <Star
+                                    size={20}
+                                    className="text-yellow-500"
+                                    onClick={() => actualizarMainDevice(disp.id)}
+                                />
+                            ) : (
+                                <StarOff
+                                    size={20}
+                                    className="text-gray-400 hover:text-yellow-500"
+                                    onClick={() => actualizarMainDevice(disp.id)}
+                                />
+                            )}
+                        </div>
+
+                        <img className="w-full h-32 object-contain mb-3" src={disp.imagen} alt={`Imagen de ${disp.nombre}`} />
                         <h2 className="text-lg font-bold mb-2">{disp.nombre}</h2>
-                                    <p className="text-gray-700">Estado: {disp.activo ? 'Activo' : 'Desactivado'}</p>
+                        <p className="text-gray-700">Estado: {disp.activo ? 'Activo' : 'Desactivado'}</p>
                         <p className="text-gray-700">Temp: {disp.temperatura}</p>
                         <p className="text-gray-700">Humedad: {disp.humedad}</p>
                         <p className="text-gray-700">ICA: {disp.ica}</p>
@@ -147,9 +173,7 @@ export default function Dispositivos() {
                         <div className="flex gap-2 mt-4">
                             <button
                                 onClick={() => toggleActivacion(disp.id)}
-                                className={`text-white text-sm px-3 py-1 rounded transition-colors ${
-                                    disp.activo ? 'bg-red-500 hover:bg-red-600' : 'bg-sky-500 hover:bg-sky-600'
-                                }`}
+                                className={`text-white text-sm px-3 py-1 rounded transition-colors ${disp.activo ? 'bg-red-500 hover:bg-red-600' : 'bg-sky-500 hover:bg-sky-600'}`}
                             >
                                 {disp.activo ? 'Desactivar' : 'Activar'}
                             </button>
@@ -160,7 +184,10 @@ export default function Dispositivos() {
                                 Editar
                             </button>
                             <button
-                                //onClick={() => eliminarDispositivo(disp.id)}
+                                onClick={() => {
+                                    setDispositivoAEliminar(disp);
+                                    setModalEliminarAbierto(true);
+                                }}
                                 className="bg-red-400 text-white text-sm px-3 py-1 rounded hover:bg-red-500"
                             >
                                 Eliminar
@@ -170,13 +197,20 @@ export default function Dispositivos() {
                 ))}
             </div>
 
-            {/* Modal */}
             <DispositivoModal
                 isOpen={modalAbierto}
                 onClose={cerrarModal}
                 dispositivo={dispositivoSeleccionado}
                 modoEdicion={modoEdicion}
                 onCrear={crearDispositivo}
+                onEditar={editarDispositivo}
+            />
+
+            <ConfirmarEliminacionModal
+                isOpen={modalEliminarAbierto}
+                onClose={() => setModalEliminarAbierto(false)}
+                onConfirm={eliminarDispositivo}
+                nombreDispositivo={dispositivoAEliminar?.nombre || ''}
             />
         </div>
     );

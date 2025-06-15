@@ -1,19 +1,54 @@
-import { useState } from 'react';
-import { Eye } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import AuditTrailService from '../services/AuditTrailService';
 
 export type EventoHistorial = {
+    id: number;
     fecha: string;
     hora: string;
     dispositivo: string;
     tipoEvento: 'Manual' | 'Automatico';
     origen: string;
     umbrales: string;
-    condicion: string;
+};
+
+export type LogResource = {
+    id: number;
+    timestamp: string;
+    message: string;
+    level: string;
+    source: string;
 };
 
 export default function Historial() {
+    const [eventos, setEventos] = useState<EventoHistorial[]>([]);
     const [eventoSeleccionado, setEventoSeleccionado] = useState<EventoHistorial | null>(null);
     const [verDetalle, setVerDetalle] = useState(false);
+
+    useEffect(() => {
+        const fetchEventos = async () => {
+            try {
+                const logs = await AuditTrailService.getAllLogs();
+                if (Array.isArray(logs)) {
+                    const formattedLogs: EventoHistorial[] = logs.map((log: any) => ({
+                        id: log.id,
+                        fecha: log.timestamp?.split('T')[0] || 'N/A',
+                        hora: log.timestamp?.split('T')[1]?.split('.')[0] || 'N/A',
+                        dispositivo: log.source || 'Desconocido',
+                        tipoEvento: log.level === 'INFO' ? 'Manual' : 'Automatico',
+                        origen: log.source || 'Desconocido',
+                        umbrales: 'N/A'
+                    }));
+                    setEventos(formattedLogs);
+                } else {
+                    console.error('Invalid logs format');
+                }
+            } catch (error) {
+                console.error('Error fetching logs:', error);
+            }
+        };
+
+        fetchEventos();
+    }, []);
 
     return (
         <div className="space-y-6">
@@ -28,6 +63,24 @@ export default function Historial() {
                     </tr>
                     </thead>
                     <tbody>
+                    {eventos.map((evento) => (
+                        <tr key={evento.id} className="bg-white hover:bg-gray-50">
+                            <td className="px-4 py-2">{`${evento.fecha} ${evento.hora}`}</td>
+                            <td className="px-4 py-2">{evento.dispositivo}</td>
+                            <td className="px-4 py-2">{evento.tipoEvento}</td>
+                            <td className="px-4 py-2">
+                                <button
+                                    onClick={() => {
+                                        setEventoSeleccionado(evento);
+                                        setVerDetalle(true);
+                                    }}
+                                    className="text-sky-500 hover:underline"
+                                >
+                                    Ver Detalle
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
                     </tbody>
                 </table>
             </div>
@@ -41,7 +94,6 @@ export default function Historial() {
                         <p><strong>Origen:</strong> {eventoSeleccionado.origen}</p>
                         <p><strong>Dispositivo:</strong> {eventoSeleccionado.dispositivo}</p>
                         <p><strong>Umbrales configurados:</strong> {eventoSeleccionado.umbrales}</p>
-                        <p><strong>Condición que activó el evento:</strong> {eventoSeleccionado.condicion}</p>
                         <div className="flex justify-end mt-4">
                             <button
                                 onClick={() => setVerDetalle(false)}

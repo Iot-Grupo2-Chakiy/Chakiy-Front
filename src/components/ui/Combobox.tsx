@@ -2,16 +2,16 @@ import { useState, useRef, useEffect } from "react";
 
 // Componente genérico de Combobox
 interface ComboboxProps<T> {
-  items: T[];                                    // Lista de elementos para mostrar
-  value: T | null;                               // Elemento seleccionado actualmente
-  onChange: (item: T | null) => void;            // Manejador cuando cambia la selección
-  getDisplayValue: (item: T) => string;          // Función para obtener el texto de visualización
-  getFilterValue?: (item: T, search: string) => boolean; // Función personalizada de filtrado (opcional)
-  getItemId?: (item: T) => string | number;      // Función para obtener un ID único (opcional)
-  placeholder?: string;                          // Placeholder para el input
-  disabled?: boolean;                            // Deshabilitar el combobox
-  className?: string;                            // Clase CSS adicional
-  renderItem?: (item: T) => React.ReactNode;     // Renderizado personalizado del elemento (opcional)
+  items: T[];
+  value: T | null;
+  onChange: (item: T | null) => void;
+  getDisplayValue: (item: T) => string;
+  getFilterValue?: (item: T, search: string) => boolean;
+  getItemId?: (item: T) => string | number;
+  placeholder?: string;
+  disabled?: boolean;
+  className?: string;
+  renderItem?: (item: T) => React.ReactNode;
 }
 
 function Combobox<T>({

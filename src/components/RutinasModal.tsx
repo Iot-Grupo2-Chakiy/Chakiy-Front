@@ -48,28 +48,17 @@ export default function RutinaModal({ isOpen, onClose, rutinaEditar }: Props) {
         startTime: "",
         endTime: "",
         ubication: "",
-        isDry: false, // Default value for new routines
+        isDry: false,
       });
     }
   }, [rutinaEditar, iotDevices]);
 
-  const cargarDispositivos = async () => {
-    try {
-      const data = await IoTDevicesService.getAllIoTDevices() as IoTDeviceResponse[];
-      setIoTDevices(data);
-    } catch {
-      alert("Error al cargar los dispositivos. Por favor, inténtalo de nuevo.");
-    }
-  };
-
-  useEffect(() => {
-    cargarDispositivos();
-  }, []);
-
   const handleChange = (
       e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
+
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
@@ -93,7 +82,7 @@ export default function RutinaModal({ isOpen, onClose, rutinaEditar }: Props) {
         startTime: formData.startTime,
         endTime: formData.endTime,
         ubication: formData.ubication,
-        isDry: formData.isDry, // Include isDry in the submitted data
+        isDry: formData.isDry,
       };
 
       if (rutinaEditar) {
@@ -131,6 +120,17 @@ export default function RutinaModal({ isOpen, onClose, rutinaEditar }: Props) {
         formData.ubication.trim()
     );
   }, [formData]);
+  const cargarDispositivos = async () => {
+    try {
+      const data = await IoTDevicesService.getAllIoTDevices() as IoTDeviceResponse[];
+      setIoTDevices(data);
+    } catch {
+      alert("Error al cargar los dispositivos. Por favor, inténtalo de nuevo.");
+    }
+  };
+  useEffect(() => {
+    cargarDispositivos();
+  }, []);
 
   return (
       <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">

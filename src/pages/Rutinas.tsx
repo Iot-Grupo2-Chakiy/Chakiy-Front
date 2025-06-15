@@ -5,7 +5,6 @@ import RutinaDetalleModal from "../components/RutinaDetalleModal";
 import type { RoutineResponse } from "@/utils/responseInterfaces";
 import RoutineService from "../services/RoutineService";
 
-// Tipo de rutina
 export type Rutina = {
   nombre: string;
   dispositivo: string;

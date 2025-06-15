@@ -1,6 +1,5 @@
 //const API_BASE_URL = "https://chakiyiotsupermain-aqd8ephjbra0e5bf.canadacentral-01.azurewebsites.net/api/v1/iot-devices";
 const API_BASE_URL = "http://localhost:8091/api/v1/iot-devices";
-
 const IoTDevicesService = {
   async createIoTDevice(deviceData: object): Promise<void> {
     const response = await fetch(`${API_BASE_URL}`, {
@@ -12,6 +11,19 @@ const IoTDevicesService = {
     });
     if (!response.ok) {
       throw new Error("Error creating IoT device");
+    }
+  },
+
+  async updateIoTDeviceById(id: number, deviceData: object): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(deviceData),
+    });
+    if (!response.ok) {
+      throw new Error("Error updating IoT device");
     }
   },
 
@@ -46,6 +58,28 @@ const IoTDevicesService = {
       throw new Error("Error fetching IoT device by ID");
     }
     return response.json();
+  },
+
+  async updateIoTMainDeviceById(id: number, mainDeviceData: object): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/${id}/main-device`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(mainDeviceData),
+    });
+    if (!response.ok) {
+      throw new Error("Error updating IoT main device");
+    }
+  },
+
+  async deleteIoTDeviceById(id: number): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/${id}`, {
+      method: "DELETE",
+    });
+    if (!response.ok) {
+      throw new Error("Error deleting IoT device");
+    }
   },
 };
 
