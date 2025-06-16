@@ -1,69 +1,79 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import backgroundLogin from '../assets/background_login.png';
 
 export default function Login() {
-    const navigate = useNavigate();
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState({ email: false, password: false });
+  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState({ email: '', password: '' });
 
-    const handleLogin = () => {
-        const emailError = !email;
-        const passwordError = !password;
+  const handleLogin = () => {
+    let valid = true;
+    let newError = { email: '', password: '' };
 
-        if (emailError || passwordError) {
-            setError({ email: emailError, password: passwordError });
-        } else {
-            setError({ email: false, password: false });
-            navigate('/dashboard'); // Redirige al dashboard
-        }
-    };
+    if (!email) {
+      newError.email = 'El correo es obligatorio.';
+      valid = false;
+    }
+    if (!password) {
+      newError.password = 'La contraseña es obligatoria.';
+      valid = false;
+    }
+    setError(newError);
 
-    return (
-        <div className="min-h-screen flex items-center justify-center bg-black text-white">
-            <div className="w-full max-w-md space-y-6 p-8 bg-neutral-900 rounded-lg">
-                <h1 className="text-3xl font-bold">Sign in</h1>
-                <p className="text-sm text-gray-400">
-                    Log in to unlock tailored content and stay connected with your community.
-                </p>
-                <div>
-                    <input
-                        type="email"
-                        placeholder="Email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className={`w-full p-2 rounded bg-neutral-800 text-white border ${
-                            error.email ? 'border-red-500' : 'border-gray-700'
-                        }`}
-                    />
-                    {error.email && (
-                        <p className="text-red-500 text-sm mt-1">El campo de email es obligatorio.</p>
-                    )}
-                </div>
-                <div>
-                    <input
-                        type="password"
-                        placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className={`w-full p-2 rounded bg-neutral-800 text-white border ${
-                            error.password ? 'border-red-500' : 'border-gray-700'
-                        }`}
-                    />
-                    {error.password && (
-                        <p className="text-red-500 text-sm mt-1">El campo de contraseña es obligatorio.</p>
-                    )}
-                </div>
-                <button
-                    onClick={handleLogin}
-                    className="w-full py-2 rounded bg-white text-black hover:bg-gray-200"
-                >
-                    Sign in
-                </button>
-                <p className="text-sm text-center">
-                    Don't have an account? <a className="underline" href="#">Sign up</a>
-                </p>
-            </div>
+    if (valid) {
+      navigate('/dashboard');
+    }
+  };
+
+  return (
+    <div
+      className="h-screen w-screen bg-cover bg-center flex items-center justify-end"
+      style={{ backgroundImage: `url(${backgroundLogin})` }}
+    >
+      <div className="w-full max-w-md p-8 bg-white/90 rounded-lg shadow-lg backdrop-blur-sm mr-20">
+        <h1 className="text-3xl font-bold text-center text-[#3A88D0]">Iniciar Sesión</h1>
+        <p className="text-sm text-center text-gray-700 mb-6">
+          Ingresa tus credenciales para acceder a Chacki'y
+        </p>
+
+        <div className="mb-4">
+          <input
+            type="email"
+            placeholder="Correo electrónico"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className={`w-full p-3 rounded bg-gray-100 border ${error.email ? 'border-red-500' : 'border-gray-300'}`}
+          />
+          {error.email && <p className="text-red-500 text-sm mt-1">{error.email}</p>}
         </div>
-    );
+
+        <div className="mb-6">
+          <input
+            type="password"
+            placeholder="Contraseña"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className={`w-full p-3 rounded bg-gray-100 border ${error.password ? 'border-red-500' : 'border-gray-300'}`}
+          />
+          {error.password && <p className="text-red-500 text-sm mt-1">{error.password}</p>}
+        </div>
+
+        <button
+          onClick={handleLogin}
+          className="w-full py-2 rounded bg-[#60B4E4] hover:bg-[#3A88D0] text-white font-semibold transition"
+        >
+          Iniciar Sesión
+        </button>
+
+        <p className="text-sm text-center text-gray-600 mt-4">
+          ¿No tienes una cuenta?{' '}
+          <Link to="/register" className="text-[#3A88D0] underline cursor-pointer">
+            Regístrate
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
 }
