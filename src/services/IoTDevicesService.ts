@@ -1,4 +1,5 @@
-const API_BASE_URL = "https://chakiyiotsupermain-aqd8ephjbra0e5bf.canadacentral-01.azurewebsites.net/api/v1/iot-devices";
+const API_BASE_URL = "http://localhost:8091/api/v1/iot-devices";
+const EDGE_API_URL = "http://127.0.0.1:5000";
 
 const IoTDevicesService = {
   async createIoTDevice(deviceData: object): Promise<void> {
@@ -10,6 +11,7 @@ const IoTDevicesService = {
       body: JSON.stringify(deviceData),
     });
     if (!response.ok) {
+      console.log("Edge API URL:", EDGE_API_URL);
       throw new Error("Error creating IoT device");
     }
   },
@@ -81,9 +83,11 @@ const IoTDevicesService = {
       method: "DELETE",
     });
     if (!response.ok) {
+      const errorDetails = await response.text();
+      console.error(`Error deleting IoT device: ${response.status} - ${errorDetails}`);
       throw new Error("Error deleting IoT device");
     }
-  },
+  }
 };
 
 export default IoTDevicesService;
