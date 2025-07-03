@@ -1,7 +1,9 @@
+import type {HealthRecord} from "@/types/HealthRecord.ts";
+
 const EDGE_API_URL = "http://127.0.0.1:5000/api/v1/health-dehumidifier/data-records/latest";
 
 const EdgeService = {
-    async getLatestHealthRecord(deviceId: string): Promise<object> {
+    async getLatestHealthRecord(deviceId: string): Promise<HealthRecord> {
         const response = await fetch(`${EDGE_API_URL}?device_id=${deviceId}`, {
             method: "GET",
             headers: {
@@ -18,4 +20,3 @@ const EdgeService = {
 };
 
 export default EdgeService;
-
