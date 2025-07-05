@@ -185,7 +185,7 @@ export default function RutinaModal({ isOpen, onClose, rutinaEditar }: Props) {
               <input
                   type="text"
                   name="condition"
-                  placeholder="Condición (Temp > 20)"
+                  placeholder="Condición (Humedad > 20)"
                   value={formData.condition}
                   onChange={handleChange}
                   className="w-full border px-4 py-2 rounded"

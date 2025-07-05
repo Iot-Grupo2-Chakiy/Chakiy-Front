@@ -21,11 +21,12 @@ export default function Sidebar() {
 
     return (
         <aside
-            className={`h-screen bg-sky-400 text-white p-4 transition-all duration-300 flex flex-col ${
+            className={`h-screen bg-sky-400 text-white transition-all duration-300 flex flex-col ${
                 collapsed ? 'w-20' : 'w-64'
             }`}
         >
-            <div className="flex items-center justify-between mb-8 w-full">
+            {/* Fixed Header */}
+            <div className="flex items-center justify-between mb-4 w-full p-4">
                 {!collapsed && (
                     <div className="text-2xl font-bold pl-1">Chacki’y</div>
                 )}
@@ -42,23 +43,26 @@ export default function Sidebar() {
                 </button>
             </div>
 
-            <nav className="flex flex-col gap-4">
-                {navItems.map((item) => (
-                    <NavLink
-                        key={item.title}
-                        to={item.path}
-                        className={({ isActive }) =>
-                            `flex items-center gap-3 px-3 py-2 rounded font-semibold transition-colors w-full ${
-                                isActive
-                                    ? 'bg-sky-700 text-white'
-                                    : 'hover:bg-sky-500 text-white'
-                            }`
-                        }
-                    >
-                        <item.icon className="w-5 h-5" />
-                        {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                ))}
+            {/* Scrollable Navigation */}
+            <nav className="flex-1 overflow-y-auto px-4">
+                <div className="flex flex-col gap-4">
+                    {navItems.map((item) => (
+                        <NavLink
+                            key={item.title}
+                            to={item.path}
+                            className={({ isActive }) =>
+                                `flex items-center gap-3 px-3 py-2 rounded font-semibold transition-colors w-full ${
+                                    isActive
+                                        ? 'bg-sky-700 text-white'
+                                        : 'hover:bg-sky-500 text-white'
+                                }`
+                            }
+                        >
+                            <item.icon className="w-5 h-5" />
+                            {!collapsed && <span>{item.title}</span>}
+                        </NavLink>
+                    ))}
+                </div>
             </nav>
         </aside>
     );

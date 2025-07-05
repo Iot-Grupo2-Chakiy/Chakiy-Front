@@ -11,7 +11,9 @@ const RoutineService = {
     if (!response.ok) {
       throw new Error("Error fetching routines");
     }
-    return response.json();
+    const data = await response.json();
+    console.log("Fetched routines:", data); // Log the response data
+    return data;
   },
 
   async getRoutineById(id: number): Promise<RoutineResponse> {
