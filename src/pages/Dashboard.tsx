@@ -177,7 +177,6 @@ useEffect(() => {
                           nrOfLevels={20}
                           arcPadding={0.05}
                           animate={false}
-                          needleTransitionDuration={0}
                           percent={
                             sensor.nombre === 'Temperatura'
                               ? Math.min(sensor.valor / 50, 1)
