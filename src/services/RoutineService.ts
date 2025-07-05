@@ -1,7 +1,7 @@
 import type { CreateRoutineRequest, UpdateRoutineRequest } from "@/utils/requestInterfaces";
 import type { RoutineResponse } from "@/utils/responseInterfaces";
 
-const API_BASE_URL = "http://localhost:8091/api/v1/routine";
+const API_BASE_URL = "https://chakiyiotsupermain-aqd8ephjbra0e5bf.canadacentral-01.azurewebsites.net/api/v1/routine";
 
 const RoutineService = {
   async getAllRoutines(): Promise<RoutineResponse[]> {

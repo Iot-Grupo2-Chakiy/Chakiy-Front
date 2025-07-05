@@ -1,7 +1,7 @@
 import type {HealthRecord} from "@/types/HealthRecord.ts";
 
 const EDGE_API_URL = "http://127.0.0.1:5000/api/v1/health-dehumidifier/data-records/latest";
-const API_KEY = "apichakiykey"; // O puedes usar una variable de entorno
+const API_KEY = "apichakiykey";
 
 const EdgeService = {
     async getLatestHealthRecord(deviceId: string): Promise<HealthRecord> {
