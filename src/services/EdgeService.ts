@@ -1,6 +1,6 @@
 import type {HealthRecord} from "@/types/HealthRecord.ts";
 
-const EDGE_API_URL = "http://127.0.0.1:5000/api/v1/health-dehumidifier/data-records/latest";
+const EDGE_API_URL = "https://cb42b2bc7d28.ngrok-free.app/api/v1/health-dehumidifier/data-records/latest";
 const API_KEY = "apichakiykey";
 
 const EdgeService = {
